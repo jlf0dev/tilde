@@ -415,13 +415,16 @@
       return ('0' + num.toString()).slice(-2);
     }
 
+    // returns the hours number for a date, between 1 and 12
+    _hours12(num) { return (num + 24) % 12 || 12; }
+
     _registerEvents() {
       this._el.addEventListener('click', this._form.show);
     }
 
     _setTime() {
       const date = new Date();
-      const hours = this._pad(date.getHours());
+      const hours = this._hours12(date.getHours());
       const minutes = this._pad(date.getMinutes());
       this._el.innerHTML = hours + this._delimiter + minutes;
     }
