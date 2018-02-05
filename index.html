@@ -6,7 +6,7 @@
         // the category, name, key, url, search path and color for your commands
         // if none of the specified keys are matched, the '*' key is used
         commands: [
-          [null, 'Google', '*', 'https://google.com', '/search?q={}', '#111'],
+          [null, 'Google', '*', 'https://google.com', '/search?q={}', null],
           ['School', 'Asulearn', 'a', 'https://asulearn.appstate.edu/my/', null, '#FEC700'],
           ['School', 'Appalnet', 'A', 'https://bannerweb.appstate.edu/', null, '#CCCC00'],
           ['Work', 'GitHub', 'g', 'https://github.com', '/search?q={}', '#333'],
@@ -14,7 +14,7 @@
           ['Finance', 'Wells Fargo', 'w', 'https://www.wellsfargo.com/', null, '#BB0826'],
           ['Finance', 'Mint', 'm', 'https://mint.intuit.com/overview.event', null, '#09C372'],
           ['Lurk', 'Reddit', 'r', 'https://www.reddit.com', '/search?q={}', '#5f99cf'],
-          ['Lurk', 'Twitter', 't', 'https://twitter.com', '/search?q={}', '#1da1f2'],
+          ['Lurk', 'Medium', 'e', 'https://medium.com', '/search?q={}', '#292929'],
           ['Listen', 'Spotify', 's', 'https://open.spotify.com/browse/featured', '/search/results/{}', '#1DB954'],
           ['Listen', 'Line Radio', 'l', 'https://linerad.io', '/#{}', '#39CCCC'],
           ['Watch', 'YouTube', 'y', 'https://www.youtube.com/', '/results?search_query={}', '#cd201f'],
@@ -91,7 +91,9 @@
         padding: 0;
         transition: background .2s;
         font-family: Lato, sans-serif;
-        color: #222;
+        color: #fff;
+        background: #343d46;
+;
       }
 
       input,
@@ -135,7 +137,7 @@
 
       #search-form {
         padding: 1em;
-        background: #111;
+        background: #343d46;
         transition: background-color .5s;
         box-sizing: border-box;
         z-index: 2;
@@ -200,7 +202,8 @@
       #help {
         display: block;
         padding: 8vw;
-        background: #fff;
+        background-color: #343d46;
+        color: #fff;
         font-size: 1.3rem;
         z-index: 1;
       }
@@ -239,8 +242,8 @@
         width: 2.5em;
         margin-right: 1em;
         border-radius: 50%;
-        background-color: #222;
-        color: #fff;
+        background-color: #fff;
+        color: #222;
         font-size: .8em;
         text-align: center;
       }
@@ -259,7 +262,7 @@
         height: 2px;
         transition: .2s;
         transform: translateX(-2em);
-        background-color: #222;
+        background-color: #fff;
         opacity: 0;
       }
 
@@ -404,7 +407,9 @@
         }
 
         // returns the hours number for a date, between 1 and 12
-        _hours12(num) { return (num + 24) % 12 || 12; }
+        _hours12(num) { 
+          return (num + 24) % 12 || 12; 
+        }
 
         _registerEvents() {
           this._el.addEventListener('click', this._form.show);
