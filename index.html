@@ -1,5 +1,12 @@
 <!doctype html>
   <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+
+    <title>~</title>
+
     <script>
       const CONFIG = {
 
@@ -71,12 +78,6 @@
       };
     </script>
 
-    <meta charset="utf-8">
-    <meta http-equiv="x-dns-prefetch-control" content="on">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="noindex">
-
-    <title>~</title>
 
     <style type="text/css">
       @import url('https://fonts.googleapis.com/css?family=Lato:400,900');
@@ -187,9 +188,9 @@
       .search-suggestion b::after {
         content: ' ';
         position: absolute;
-        top: 51%;
         right: 0;
         left: 0;
+        bottom: -.2em;
         height: 3px;
         background-color: #fff;
         opacity: .8;
@@ -335,7 +336,9 @@
         }
       }
     </style>
+
   </head>
+
   <body>
     <div class="center">
       <time id="clock"></time>
@@ -646,7 +649,13 @@
           this._influencers.forEach(i => i.addItem(query));
         }
 
-        suggest(input) {
+        _bindMethods() {
+          this._handleKeydown = this._handleKeydown.bind(this);
+          this._highlight = this._highlight.bind(this);
+          this._unHighlight = this._unHighlight.bind(this);
+        }
+
+        _suggest(input) {
           input = input.trim();
           if (input === '') this._clearSuggestions();
 
@@ -687,8 +696,11 @@
           this._suggestionEls = $.els('.js-search-suggestion');
         }
 
-        _bindMethods() {
-          this._handleKeydown = this._handleKeydown.bind(this);
+        _clearSuggestions() {
+          $.bodyClassRemove('suggestions');
+          this._clearClickEvents();
+          this._suggestionEls = [];
+          this._el.innerHTML = '';
         }
 
         _clearClickEvents() {
@@ -698,27 +710,25 @@
           });
         }
 
-        _clearSuggestions() {
-          $.bodyClassRemove('suggestions');
-          this._clearClickEvents();
-          this._suggestionEls = [];
-          this._el.innerHTML = '';
-        }
-
         // [[1, 2], [1, 2, 3, 4]] -> [1, 2, 3, 4]
         _flattenAndUnique(array) {
           return [...new Set([].concat.apply([], array))];
         }
 
+        _handleKeydown(e) {
+          if ($.isDown(e)) this._focusNext(e);
+          if ($.isUp(e)) this._focusPrevious(e);
+        }
+
         _focusNext(e) {
           const exists = this._suggestionEls.some((el, i) => {
-            if (el.classList.contains('highlight')) {
-              this._highlight(this._suggestionEls[i + 1], e);
+            if (el.classList.contains('highlight') && this._suggestionEls[i + 1])  {
+              this._highlight(this._suggestionEls[i + 1]);
               return true;
             }
           });
 
-          if (!exists) this._highlight(this._suggestionEls[0], e);
+          if (!exists) this._highlight(this._suggestionEls[0]);
         }
 
         _focusPrevious(e) {
@@ -737,32 +747,33 @@
             .map(influencer => influencer.getSuggestions(input));
         }
 
-        _handleKeydown(e) {
-          if ($.isDown(e)) this._focusNext(e);
-          if ($.isUp(e)) this._focusPrevious(e);
-        }
-
-        _highlight(el, e) {
-          this._unHighlight();
-
-          if (el) {
-            this._onHighlight(el.getAttribute('data-suggestion'));
-            el.classList.add('highlight');
-            e.preventDefault();
-          }
-        }
-
         _registerEvents() {
           document.addEventListener('keydown', this._handleKeydown);
         }
-
+        
+        // Registers events on elements after the mouse is moved
         _registerSuggestionEvents() {
-          this._suggestionEls.forEach(el => {
-            const value = el.getAttribute('data-suggestion');
-            el.addEventListener('mouseover', this._highlight.bind(this, el));
-            el.addEventListener('mouseout', this._unHighlight.bind(this));
-            el.addEventListener('click', this._onClick.bind(null, value));
-          });
+          const handler = (e) => {
+            document.removeEventListener('mousemove', handler);
+            this._suggestionEls.forEach(el => {
+              const value = el.getAttribute('data-suggestion');
+              el.addEventListener('click', this._onClick);
+              el.addEventListener('mouseover', this._highlight);
+              el.addEventListener('mouseout', this._unHighlight);
+            });
+          }
+          document.addEventListener('mousemove', handler);
+        }
+
+        // Can be passed event (from mouseover) or element (from keyboard)
+        _highlight(e) {
+          this._unHighlight();
+          if (e.target) {
+            e.preventDefault();
+            e = e.target;
+          }
+          this._onHighlight(e.getAttribute('data-suggestion'));
+          e.classList.add('highlight');
         }
 
         _unHighlight(e) {
@@ -934,7 +945,7 @@
           if (!newQuery || isHelp) this.hide();
           if (isHelp) this._help.toggle();
           if (this._instantRedirect && isKey) this._submitWithValue(newQuery);
-          if (this._suggester) this._suggester.suggest(newQuery);
+          if (this._suggester) this._suggester._suggest(newQuery);
         }
 
         _loadQueryParam() {
@@ -970,6 +981,11 @@
           this._formEl.style.backgroundColor = color;
         }
 
+        _submitWithValue(value) {
+          this._inputEl.value = value;
+          this._submitForm();
+        }
+
         _submitForm(e) {
           if (e) e.preventDefault();
           const query = this._inputEl.value;
@@ -978,10 +994,6 @@
           this._redirect(this._queryParser.parse(query).redirect);
         }
 
-        _submitWithValue(value) {
-          this._inputEl.value = value;
-          this._submitForm();
-        }
       }
     </script>
 
