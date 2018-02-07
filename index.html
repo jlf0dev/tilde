@@ -982,6 +982,10 @@
         }
 
         _submitWithValue(value) {
+          if (value.target) {
+            value.preventDefault;
+            value = value.target.getAttribute('data-suggestion');
+          }
           this._inputEl.value = value;
           this._submitForm();
         }
